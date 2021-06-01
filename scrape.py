@@ -11,6 +11,7 @@ def get_url(category, query_params):
 
 
 def parse_site(url):
+    print(url)
     json_data = parse_page(url)
     pages = json_data['totalPageCount']
     for page in range(pages - 1):
@@ -18,6 +19,12 @@ def parse_site(url):
 
     with open('./json_data.json', 'w') as f:
         f.write(json.dumps(json_data, indent=2, sort_keys=True))
+    return json_data['ads'][0]['adId']
+
+
+def check_latest(url):
+    json_data = parse_page(url)
+    return json_data['ads'][0]['adId']
 
 
 def parse_page(url, page=None):

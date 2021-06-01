@@ -1,4 +1,9 @@
-from scrape import get_url, parse_site
+import threading
+import matplotlib.pyplot as plt
+import smtplib
+import winsound
+from time import sleep
+from scrape import get_url, parse_site, check_latest
 from plot import plot_shit
 
 
@@ -14,13 +19,33 @@ PARAMS = {
     'me': 31,       # 31 => max mileage 24999 (note: also change input to plot_shit)
     'pe': 8,        # 11 => price 100k
     'cxdw': 0,      # 0 => twd
+    'cbl1': 2,      # 2 => 3-series
     'q': 'bmw',
-    'sort': 'price'
+    'sort': 'date'
 }
+URL = get_url(CATEGORY, PARAMS)
+
+
+def hoot():
+    winsound.Beep(250, 100)
+    winsound.Beep(250, 100)
 
 
 if __name__ == '__main__':
-    URL = get_url(CATEGORY, PARAMS)
-    print(URL)
-    parse_site(URL)
+    latest = parse_site(URL)
+
+    def loop():
+        global latest
+        while True:
+            laterest = check_latest(URL)
+            if latest != laterest:
+                print('New objects...')
+                hoot()
+                latest = parse_site(URL)
+            sleep(5)
+
+    t1 = threading.Thread(target=loop)
+    t1.start()
+
     plot_shit(OUTPUT, 24999)
+    t1.join()
