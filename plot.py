@@ -1,9 +1,10 @@
 import json
 import matplotlib.pyplot as plt
+import unidecode
 
 
-def scatter_by_mileage(models, data, max_mileage=24999):
-    by_mileage = sorted(filter(lambda ad: ad['mileage'] <= max_mileage, data), key=lambda ad: ad['mileage'])
+def scatter_by_mileage(models, data, min_price=5000, min_mileage=4999, max_mileage=34999):
+    by_mileage = sorted(filter(lambda ad: max_mileage >= ad['mileage'] >= min_mileage, data), key=lambda ad: ad['mileage'])
     by_mileage_x = list()
     by_mileage_y = list()
 
@@ -35,27 +36,51 @@ def scatter_by_mileage(models, data, max_mileage=24999):
     plt.ylabel('SEK')
     plt.grid(c='black', alpha=0.1)
     plt.gca().xaxis.set_major_locator(plt.MultipleLocator(500))
-    plt.gca().yaxis.set_major_locator(plt.MultipleLocator(5000))
+    plt.gca().yaxis.set_major_locator(plt.MultipleLocator(max(min_price, 0)))
     plt.ylim(0)
     plt.show()
 
 
 def plot_shit(file):
     data = []
+    models = []
+    i = 0
     with open(file, 'r') as f:
         for ad in json.load(f)['ads']:
-            params = list(filter(lambda x: x['id'] == 'level_2', ad['parameterGroups'][1]['parameters']))
+            level_1 = list(filter(lambda x: x['id'] == 'level_1', ad['parameterGroups'][1]['parameters']))
+            level_2 = list(filter(lambda x: x['id'] == 'level_2', ad['parameterGroups'][1]['parameters']))
+            level_1 = level_1[0]['value'] if level_1 else 'Unknown'
+            level_2 = level_2[0]['value'] if level_2 else 'Unknown'
+            model = level_1 + '/' + level_2
+
+            if model not in models:
+                models.append(model)
+
+            mileage = ad['parameterGroups'][0]['parameters'][2]['value'].split('-')
+            mileage = unidecode.unidecode(mileage[max(len(mileage) - 1, 0)])\
+                .replace('Mer an ', '')\
+                .replace(' ', '')
+
             data.append({
-                'subject': ad['subject'],
+                'subject': unidecode.unidecode(ad['subject']),
                 'id': ad['adId'],
                 'url': ad['shareUrl'],
-                'location': ad['location'][0]['name'],
+                'location': unidecode.unidecode(ad['location'][0]['name']),
                 'price': ad['price']['value'],
                 'year': ad['parameterGroups'][0]['parameters'][3]['value'],
                 'fuel': ad['parameterGroups'][0]['parameters'][0]['value'],
-                'mileage': int(ad['parameterGroups'][0]['parameters'][2]['value'].replace(' ', '').split('-')[1]),
-                'model': params[0]['value'] if params else 'Unknown'
+                'mileage': int(mileage),
+                'model': model
             })
+            i += 1
 
-    scatter_by_mileage(['320', '323', '325', '328', '330'], data)
-    # scatter_by_mileage(['116', '118', '120', '123', '125', '130'], data)
+    print(models)
+    print('Ads: {}/{}'.format(i, len(data)))
+    # Specific model
+    scatter_by_mileage(list(filter(lambda x: "3-serien" in x, models)), data)
+
+    # High mileage
+    # scatter_by_mileage(models, data, max_mileage=55000)
+
+    # General
+    # scatter_by_mileage(models, data)
