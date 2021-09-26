@@ -10,27 +10,24 @@ def get_url(category, query_params):
     return url.rstrip('&')
 
 
-def parse_site(url):
-    print(url)
-    json_data = parse_page(url)
-    pages = json_data['totalPageCount']
+def parse_site(urls):
+    ads = list()
 
-    for page in range(pages - 1):
-        json_data['ads'] += parse_page(url, page + 1)['ads']
+    for url in urls:
+        json_data = parse_page(url)
+        pages = json_data['totalPageCount']
+        ads += json_data['ads']
 
-    if not json_data['ads']:
-        print("No ads found.")
-        exit(0)
+        for page in range(pages - 1):
+            ads += parse_page(url, page + 1)['ads']
+
+        print(url.replace(' ', '%20').replace('sort=date', 'sort=price'))
+
+    if not len(ads):
+        raise Exception("No ads found. Check your query.")
 
     with open('./json_data.json', 'w') as f:
-        f.write(json.dumps(json_data, indent=2, sort_keys=True))
-
-    return json_data['ads'][0]['adId']
-
-
-def check_latest(url):
-    json_data = parse_page(url)
-    return json_data['ads'][0]['adId']
+        f.write(json.dumps(ads, indent=2, sort_keys=True))
 
 
 def parse_page(url, page=None):
