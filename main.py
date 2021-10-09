@@ -45,7 +45,27 @@ BMW_330 = {
     'q': '330',
     'sort': 'date'
 }
-C63_AMG = {
+CAYMAN = {
+    'cg': 1020,     # not sure about this one
+    'mys': 2012,    # min year
+    'mye': 2016,    # max year
+    'me': 25,       # 31 => max mileage 14999
+    'ps': 1,        # 1 => min price 5k
+    'pe': 37,       # 37 => max price 600k
+    'q': 'cayman',
+    'sort': 'date'
+}
+BOXTER = {
+    'cg': 1020,     # not sure about this one
+    'mys': 2012,    # min year
+    'mye': 2016,    # max year
+    'me': 25,       # 31 => max mileage 14999
+    'ps': 1,        # 1 => min price 5k
+    'pe': 37,       # 37 => max price 600k
+    'q': 'boxter',
+    'sort': 'date'
+}
+C63 = {
     'cg': 1020,     # not sure about this one
     'mys': 2007,    # min year
     'mye': 2018,    # max year
